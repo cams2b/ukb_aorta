@@ -1,3 +1,3 @@
-# Aortic geometry phenotyping
+# Aortic geometric phenotype extraction
 
 

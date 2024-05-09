@@ -1,0 +1,270 @@
+        filling_filter = vtk.vtkFillHolesFilter()
+        filling_filter.SetHoleSize(50)
+        filling_filter.SetInputData(vtk_data)
+        filling_filter.Update()
+        vtk_data = filling_filter.GetOutput()
+
+        bounds = [0] * 6
+        vtk_data.GetBounds(bounds)
+        print(bounds)
+
+        whiteImage = vtk.vtkImageData()
+        whiteImage.SetSpacing(img_spacing)
+        whiteImage.SetDimensions(img_dim)
+        whiteImage.SetExtent(0, img_dim[0] - 1, 0, img_dim[1] - 1, 0, img_dim[2] - 1)
+
+        whiteImage.SetOrigin(img_origin)
+        whiteImage.AllocateScalars(vtk.VTK_UNSIGNED_CHAR, 1)
+        # fill the image with foreground voxels:
+        inval = 255
+        outval = 0
+        count = whiteImage.GetNumberOfPoints()
+        # for (vtkIdType i = 0 i < count ++i)
+        for i in range(count):
+            whiteImage.GetPointData().GetScalars().SetTuple1(i, inval)
+
+        extruder = vtk.vtkLinearExtrusionFilter()
+        extruder.SetInputData(vtk_data)
+        extruder.SetScaleFactor(1.0)
+        # extruder.SetExtrusionTypeToNormalExtrusion()
+        extruder.SetExtrusionTypeToVectorExtrusion()
+        extruder.SetVector(0, 0, 1)
+        extruder.Update()
+
+        pol2stenc = vtk.vtkPolyDataToImageStencil()
+        pol2stenc.SetTolerance(0)  # important if extruder.SetVector(0, 0, 1) !!!
+        pol2stenc.SetInputConnection(extruder.GetOutputPort())
+        pol2stenc.SetOutputOrigin(img_origin)
+        pol2stenc.SetOutputSpacing(img_spacing)
+        pol2stenc.SetOutputWholeExtent(whiteImage.GetExtent())
+        pol2stenc.Update()
+
+        imgstenc = vtk.vtkImageStencil()
+        imgstenc.SetInputData(whiteImage)
+        imgstenc.SetStencilConnection(pol2stenc.GetOutputPort())
+        imgstenc.ReverseStencilOff()
+        imgstenc.SetBackgroundValue(outval)
+        imgstenc.Update()
+
+        out = imgstenc.GetOutput()
+        sc = out.GetPointData().GetScalars()
+        a = vn.vtk_to_numpy(sc)
+        a = a.reshape(img_dim)
+        print(a.shape)
+        print(np.unique(a))
+
+        quit()
+        for i in range(a.shape[0]):
+            curr = a[i, :, :]
+            if len(np.unique(curr)) > 1:
+                plt.imshow(a[i, :, :])
+                plt.show()
+
+      
+        quit()
+
+
+
+
+
+
+
+
+ quit()
+        
+        data = pv.PolyData(vtk_data)
+        closed_data = data.fill_holes(50)
+        print(img_spacing)
+        voxels = pv.voxelize(closed_data, density=img_spacing)
+        #voxels.plot()
+
+        x = np.arange(0, img_dim[0], img_spacing[0])
+        y = np.arange(0, img_dim[1], img_spacing[1])
+        z = np.arange(0, img_dim[2], img_spacing[2])
+
+        x, y, z = np.meshgrid(x, y, z)
+        grid = pv.StructuredGrid(x, y, z)
+        ugrid = pv.UnstructuredGrid(grid)
+        selection = ugrid.select_enclosed_points(closed_data.extract_surface(),
+                                         tolerance=0.0,
+                                         check_surface=False)
+        
+        print(selection)
+
+        quit()
+        ### create grid
+        grid = pv.ImageData()
+        grid.dimensions = img.shape
+        grid.origin = img_origin
+        grid.spacing = img_spacing
+        print(grid)
+
+ 
+
+        quit()
+        
+        
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+bounds = [0] * 6
+        vtk_data.GetBounds(bounds)
+        print(bounds)
+
+        whiteImage = vtk.vtkImageData()
+        whiteImage.SetSpacing(img_spacing)
+        whiteImage.SetDimensions(img_dim)
+        whiteImage.SetExtent(0, img_dim[0] - 1, 0, img_dim[1] - 1, 0, img_dim[2] - 1)
+
+        whiteImage.SetOrigin(img_origin)
+        whiteImage.AllocateScalars(vtk.VTK_UNSIGNED_CHAR, 1)
+        # fill the image with foreground voxels:
+        inval = 255
+        outval = 0
+        count = whiteImage.GetNumberOfPoints()
+        # for (vtkIdType i = 0 i < count ++i)
+        for i in range(count):
+            whiteImage.GetPointData().GetScalars().SetTuple1(i, 0)
+
+      
+     
+        
+
+        #print(vtk_data)
+        points = vtk_data.GetPoints()
+
+        picker = vtk.vtkVolumePicker()
+        transform = vtk.vtkTransform()
+        
+
+        for i in range(points.GetNumberOfPoints()):
+            current_point = points.GetPoint(i)
+            print(current_point)
+
+            point = transform.GetInverse().TransformPoint(current_point)
+            normal = transform.GetInverse().TransformNormal(normal)
+
+            XYZ = [0.0, 0.0, 0.0]  # to store voxel index
+            whiteImage.TransformPhysicalPointToContinuousIndex(current_point, XYZ)
+            print(XYZ)
+            print('==============================')
+            
+            
+
+            #print(img.GetCell(int(current_point[0]), int(current_point[1]), int(current_point[2])))
+            #whiteImage.SetScalarComponentFromFloat(int(current_point[0]), int(current_point[1]), int(current_point[2]), 0, 255)
+            #print(whiteImage.GetNumberOfScalarComponents())
+            #print(whiteImage.GetScalarComponentAsFloat(int(current_point[0]), int(current_point[1]), int(current_point[2]), 0))
+
+
+
+
+        
+
+
+        ### this was in the last version prior to it working
+
+               quit()
+        
+        img = sitk.ReadImage(img_path)
+        img = sitk.GetArrayFromImage(img)
+        img = np.swapaxes(img, 0, -1)
+        for i in range(60, mask.shape[2]):
+            plt.imshow(img[:, :, i])
+            plt.imshow(mask[:, :, i], alpha=0.4)
+            plt.show()
+        
+
+        quit()
+
+
+        
+        
+        
+        imageAppend = vtk.vtkImageAppend()
+        imageAppend.SetInputConnection(stencil.GetOutputPort())
+
+        viewer = vtk.vtkImageViewer()
+        interator = vtk.vtkRenderWindowInteractor()
+        viewer.SetInputConnection(imageAppend.GetOutputPort())
+        viewer.SetupInteractor(interator)
+        viewer.SetZSlice(75)
+        viewer.SetColorWindow(2000)
+        viewer.SetColorLevel(1000)
+        viewer.GetRenderWindow().SetWindowName('PolyDataToImageDataStencil')
+        viewer.Render()
+
+        interator.Start()
+        
+
+        quit()
+
+
+        points = vtk_data.GetPoints()
+
+        mask = np.zeros(img_dim)
+       
+
+        for i in range(points.GetNumberOfPoints()):
+            current_point = points.GetPoint(i)
+            print(current_point)
+            coord = [0.0, 0.0, 0.0]  # to store voxel index
+            img.TransformPhysicalPointToContinuousIndex(current_point, coord)
+            
+            print(coord)
+            print('==============================')
+            mask[math.ceil(coord[0]), math.ceil(coord[1]), math.ceil(coord[2])] = 1
+            mask[math.floor(coord[0]), math.floor(coord[1]), math.floor(coord[2])] = 1
+            mask[int(coord[0]), int(coord[1]), int(coord[2])] = 1
+            
+
+
+        print(points)
+        print(np.sum(mask))
+        img = sitk.ReadImage(img_path)
+        img = sitk.GetArrayFromImage(img)
+        img = np.swapaxes(img, 0, -1)
+        print(img.shape)
+        print(mask.shape)
+        for i in range(60, mask.shape[2]):
+            plt.imshow(img[:, :, i])
+            plt.imshow(mask[:, :, i], alpha=0.4)
+            plt.show()
+        
+        quit()
+        rows, cols, _ = whiteImage.GetDimensions()
+        sc = whiteImage.GetPointData().GetScalars()
+        a = vn.vtk_to_numpy(sc)
+        a = a.reshape(rows, cols, -1)
+        print(a.shape)
+        print(img)
+
+        quit()
+
+
+        ### clean
+        #cleaner = vtk.vtkCleanPolyData()
+        #cleaner.SetInputData(vtk_data)
+        #cleaner.ConvertLinesToPointsOn()
+        #cleaner.ConvertPolysToLinesOn()
+        #cleaner.ConvertStripsToPolysOn()
+        #cleaner.SetTolerance(0.0001)
+        #cleaner.Update()
+        #vtk_data = cleaner.GetOutput()

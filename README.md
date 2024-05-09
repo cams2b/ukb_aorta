@@ -1,2 +1,5 @@
-# ukb_aorta
-Image analysis pipeline for extracting image-derived phenotypes of the aorta
+# vision
+
+# Aortic geometry phenotyping and genetic analysis
+
+![This is an image](/lib/figures/phenotypes.png)

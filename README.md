@@ -1,5 +1,9 @@
 # Aortic geometric phenotype extraction
 
+<p align="center">
+<img src="https://github.com/cams2b/ukb_aorta/blob/main/figures/aorta_segmentation.png">
+</p>
+
 * This repository is designed for extracting aortic geometric phenotypes (AGPs) from the UK Biobank.
 * We provide pretrained weights to allow other researchers to implement this pipeline.
 * Our AGP extraction can be used on any voxel representation of an aorta
